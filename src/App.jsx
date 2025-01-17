@@ -1,50 +1,93 @@
-import React from 'react';
-import { Provider } from 'react-redux';
-import { store } from './store/store';
-import { TaskForm } from './components/TaskForm';
-import { TaskList } from './components/TaskList';
-import { ClipboardList } from 'lucide-react';
-import { Container, Box, Typography, ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import React, { useEffect, useState } from "react";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { TaskForm } from "./components/TaskForm";
+import { TaskList } from "./components/TaskList";
+
+import {
+  Container,
+  Box,
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+} from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import LoginPage from "./components/LoginPage";
+import SignupPage from "./components/SignupPage";
+import Branding from "./components/Branding";
+import Home from "./components/HomePage";
+import Cookies from "js-cookie";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#4f46e5',
+      main: "#4f46e5",
     },
     background: {
-      default: '#f3f4f6',
+      default: "#f3f4f6",
     },
   },
 });
 
+const checkLoginStatus = () => {
+  var isLoggedin = false;
+  try {
+    const localToken = Cookies.get("localToken");
+    if (localToken) {
+      isLoggedin = true;
+    }
+  } catch (error) {
+    isLoggedin = false;
+  } finally {
+    return isLoggedin;
+  }
+};
+
 function App() {
+  const [auth, setAuth] = useState(false);
+
+  useEffect(() => {
+    setAuth(checkLoginStatus());
+  }, []);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Provider store={store}>
-          <Box sx={{ minHeight: '100vh', py: 4 }}>
-            <Container maxWidth="md">
-              <Box sx={{ textAlign: 'center', mb: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                  <ClipboardList size={48} color={theme.palette.primary.main} />
-                </Box>
-                <Typography variant="h3" component="h1" gutterBottom>
-                  Task Tracker
-                </Typography>
-                <Typography variant="subtitle1" color="text.secondary">
-                  Manage your tasks efficiently
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <TaskForm />
-                <TaskList />
-              </Box>
-            </Container>
-          </Box>
+          <Router>
+            <Box sx={{ minHeight: "100vh", py: 4 }}>
+              <Container maxWidth="md">
+                <Branding theme={theme} />
+                <Routes>
+                  {auth ? (
+                    <Route
+                      path="/"
+                      element={
+                        <>
+                          <TaskForm />
+                          <Box sx={{ pt: 3 }}>
+                            <TaskList />
+                          </Box>
+                        </>
+                      }
+                    />
+                  ) : (
+                    <Route path="/home" element={<Home />} />
+                  )}
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
+                  <Route path="*" element={<Navigate to="/login" />} />
+                </Routes>
+              </Container>
+            </Box>
+          </Router>
         </Provider>
       </LocalizationProvider>
     </ThemeProvider>

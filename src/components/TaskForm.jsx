@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { addTask } from '../store/tasksSlice';
-import { PlusCircle } from 'lucide-react';
-import { TextField, Button, Paper, Box } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { addTask } from "../store/tasksSlice";
+import { PlusCircle } from "lucide-react";
+import { TextField, Button, Paper, Box } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 export function TaskForm() {
   const dispatch = useDispatch();
-  const [taskName, setTaskName] = useState('');
-  const [description, setDescription] = useState('');
+  const [taskName, setTaskName] = useState("");
+  const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState(null);
 
   const handleSubmit = async (e) => {
@@ -21,20 +21,24 @@ export function TaskForm() {
       task_name: taskName,
       description,
       due_date: dueDate?.toISOString() || null,
-      status: 'pending',
-      created_at: new Date().toISOString()
+      status: "pending",
+      created_at: new Date().toISOString(),
     };
 
     await dispatch(addTask(newTask));
 
-    setTaskName('');
-    setDescription('');
+    setTaskName("");
+    setDescription("");
     setDueDate(null);
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 3 }}>
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+      >
         <TextField
           label="Task Name"
           value={taskName}
@@ -69,7 +73,7 @@ export function TaskForm() {
           type="submit"
           variant="contained"
           startIcon={<PlusCircle />}
-          sx={{ alignSelf: 'flex-start' }}
+          sx={{ alignSelf: "flex-start" }}
         >
           Add Task
         </Button>

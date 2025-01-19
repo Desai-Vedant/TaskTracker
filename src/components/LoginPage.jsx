@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Box,
   TextField,
@@ -8,34 +8,108 @@ import {
   Alert,
   Container,
   Paper,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useDispatch } from "react-redux";
+import { clearTasks } from "../store/tasksSlice";
+import { apiEndpoints } from "../config/api";
 
-const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const LoginPage = ({ setAuth }) => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Clear any existing errors when component mounts
+  useEffect(() => {
+    setError("");
+    // Clear any existing tasks when login page mounts
+    dispatch(clearTasks());
+  }, [dispatch]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    // Clear error when user starts typing
+    if (error) setError("");
+  };
+
+  const validateForm = () => {
+    if (!formData.email || !formData.password) {
+      setError("All fields are required");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    return true;
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setError("");
+
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/user/login",
-        { email, password },
-        { withCredentials: true }
+        apiEndpoints.login,
+        formData,
+        { 
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
       );
-      const token = response.data.token;
-      setDataToCookie("localToken", token);
-      navigate("/");
+
+      if (response.data.status === 'success') {
+        // Clear any existing tasks before setting new user data
+        dispatch(clearTasks());
+        // Store token in cookie
+        Cookies.set('localToken', response.data.token, { 
+          expires: 1/24, // 1 hour
+          secure: window.location.protocol === 'https:',
+          sameSite: 'Lax'
+        });
+
+        // Store user data
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+
+        // Update auth state
+        setAuth(true);
+
+        // Redirect to home
+        navigate("/");
+      } else {
+        setError(response.data.message || "Login failed");
+      }
     } catch (err) {
-      setError("Invalid credentials");
+      setError(err.response?.data?.message || "An error occurred during login");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const setDataToCookie = (key, value) => {
-    Cookies.set(key, value, { expires: 1 / 24 }); // Cookie expires in 1 hour
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -54,11 +128,13 @@ const LoginPage = () => {
             Access your tasks by logging in.
           </Typography>
         </Box>
+        
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
+
         <Box
           component="form"
           onSubmit={handleLogin}
@@ -71,53 +147,75 @@ const LoginPage = () => {
           <TextField
             label="Email Address"
             type="email"
+            name="email"
             fullWidth
             variant="outlined"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleInputChange}
             required
+            disabled={isLoading}
+            error={!!error && error.includes("email")}
           />
+          
           <TextField
             label="Password"
-            type="password"
+            type={showPassword ? "text" : "password"}
+            name="password"
             fullWidth
             variant="outlined"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleInputChange}
             required
+            disabled={isLoading}
+            error={!!error && error.includes("password")}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
+
           <Button
             type="submit"
             variant="contained"
             color="primary"
             size="large"
             fullWidth
+            disabled={isLoading}
             sx={{
               mt: 2,
               textTransform: "none",
               borderRadius: "8px",
+              height: "48px"
             }}
           >
-            Login
+            {isLoading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Login"
+            )}
           </Button>
+
+          <Box sx={{ mt: 2, textAlign: "center" }}>
+            <Typography variant="body2" color="textSecondary">
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                style={{ color: "primary.main", textDecoration: "none" }}
+              >
+                Sign up
+              </Link>
+            </Typography>
+          </Box>
         </Box>
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          align="center"
-          sx={{ mt: 2 }}
-        >
-          Don’t have an account?{" "}
-          <Button
-            variant="text"
-            color="primary"
-            size="small"
-            onClick={() => navigate("/signup")}
-            sx={{ textTransform: "none" }}
-          >
-            Sign up here
-          </Button>
-        </Typography>
       </Paper>
     </Container>
   );

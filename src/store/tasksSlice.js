@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { apiEndpoints } from "../config/api";
 
 const API_URL = "http://localhost:5000/api";
 
@@ -15,7 +16,7 @@ const initialState = {
 
 // Create an axios instance for centralized configuration
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: apiEndpoints.tasks,
   headers: {
     "Content-Type": "application/json",
   },
@@ -25,7 +26,7 @@ const apiClient = axios.create({
 // Async Thunks using axios
 export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
   try {
-    const response = await apiClient.get("/tasks");
+    const response = await apiClient.get("");
     return response.data; // Assuming the API returns an array of tasks
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to fetch tasks");
@@ -34,7 +35,7 @@ export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
 
 export const addTask = createAsyncThunk("tasks/addTask", async (task) => {
   try {
-    const response = await apiClient.post("/tasks", task);
+    const response = await apiClient.post("", task);
     return response.data; // Assuming the API returns the newly created task
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to add task");
@@ -45,7 +46,7 @@ export const updateTask = createAsyncThunk(
   "tasks/updateTask",
   async ({ id, ...updates }) => {
     try {
-      const response = await apiClient.patch(`/tasks/${id}`, updates);
+      const response = await apiClient.patch(`/${id}`, updates);
       return response.data; // Assuming the API returns the updated task
     } catch (error) {
       throw new Error(error.response?.data?.message || "Failed to update task");
@@ -55,7 +56,7 @@ export const updateTask = createAsyncThunk(
 
 export const deleteTask = createAsyncThunk("tasks/deleteTask", async (id) => {
   try {
-    await apiClient.delete(`/tasks/${id}`);
+    await apiClient.delete(`/${id}`);
     return id; // Return the ID of the deleted task
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to delete task");
@@ -67,6 +68,15 @@ const tasksSlice = createSlice({
   name: "tasks",
   initialState,
   reducers: {
+    clearTasks: (state) => {
+      state.items = [];
+      state.status = "idle";
+      state.error = null;
+      state.filter = {
+        status: null,
+        search: "",
+      };
+    },
     setStatusFilter(state, action) {
       state.filter.status = action.payload;
     },
@@ -104,5 +114,5 @@ const tasksSlice = createSlice({
   },
 });
 
-export const { setStatusFilter, setSearchTerm } = tasksSlice.actions;
+export const { setStatusFilter, setSearchTerm, clearTasks } = tasksSlice.actions;
 export default tasksSlice.reducer;

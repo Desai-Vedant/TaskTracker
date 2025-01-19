@@ -16,13 +16,12 @@ import {
 } from '@mui/material';
 import { LogOut, Menu as MenuIcon, Sun, Moon, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useThemeContext } from '../contexts/ThemeContext';
 import { useDispatch } from 'react-redux';
 import { clearTasks } from '../store/tasksSlice';
 import Logo from './Logo';
-import { apiEndpoints } from '../config/api';
+import { apiClient } from '../config/api';
+import { useThemeContext } from '../contexts/ThemeContext';
+import Cookies from 'js-cookie';
 
 const NavBar = ({ setAuth }) => {
   const navigate = useNavigate();
@@ -45,19 +44,12 @@ const NavBar = ({ setAuth }) => {
   const handleLogout = async () => {
     handleMenuClose();
     try {
-      await axios.post(apiEndpoints.logout, {}, {
-        withCredentials: true
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Clear tasks from Redux store
+      await apiClient.post('/user/logout');
       dispatch(clearTasks());
-      // Clear user data
-      Cookies.remove('localToken');
-      localStorage.removeItem('user');
       setAuth(false);
       navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
   };
 

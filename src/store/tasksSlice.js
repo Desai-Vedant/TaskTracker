@@ -1,8 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { apiEndpoints } from "../config/api";
-
-const API_URL = "http://localhost:5000/api";
+import { apiClient } from "../config/api";
 
 const initialState = {
   items: [],
@@ -14,20 +11,11 @@ const initialState = {
   },
 };
 
-// Create an axios instance for centralized configuration
-const apiClient = axios.create({
-  baseURL: apiEndpoints.tasks,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true,
-});
-
-// Async Thunks using axios
+// Async Thunks using apiClient
 export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
   try {
-    const response = await apiClient.get("");
-    return response.data; // Assuming the API returns an array of tasks
+    const response = await apiClient.get("/tasks");
+    return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to fetch tasks");
   }
@@ -35,8 +23,8 @@ export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
 
 export const addTask = createAsyncThunk("tasks/addTask", async (task) => {
   try {
-    const response = await apiClient.post("", task);
-    return response.data; // Assuming the API returns the newly created task
+    const response = await apiClient.post("/tasks", task);
+    return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to add task");
   }
@@ -46,8 +34,8 @@ export const updateTask = createAsyncThunk(
   "tasks/updateTask",
   async ({ id, ...updates }) => {
     try {
-      const response = await apiClient.patch(`/${id}`, updates);
-      return response.data; // Assuming the API returns the updated task
+      const response = await apiClient.patch(`/tasks/${id}`, updates);
+      return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || "Failed to update task");
     }
@@ -56,14 +44,13 @@ export const updateTask = createAsyncThunk(
 
 export const deleteTask = createAsyncThunk("tasks/deleteTask", async (id) => {
   try {
-    await apiClient.delete(`/${id}`);
-    return id; // Return the ID of the deleted task
+    await apiClient.delete(`/tasks/${id}`);
+    return id;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to delete task");
   }
 });
 
-// Slice definition
 const tasksSlice = createSlice({
   name: "tasks",
   initialState,
@@ -77,14 +64,14 @@ const tasksSlice = createSlice({
         search: "",
       };
     },
-    setStatusFilter(state, action) {
+    setStatusFilter: (state, action) => {
       state.filter.status = action.payload;
     },
-    setSearchTerm(state, action) {
+    setSearchTerm: (state, action) => {
       state.filter.search = action.payload;
     },
   },
-  extraReducers(builder) {
+  extraReducers: (builder) => {
     builder
       .addCase(fetchTasks.pending, (state) => {
         state.status = "loading";
@@ -101,9 +88,7 @@ const tasksSlice = createSlice({
         state.items.unshift(action.payload);
       })
       .addCase(updateTask.fulfilled, (state, action) => {
-        const index = state.items.findIndex(
-          (task) => task._id === action.payload._id
-        );
+        const index = state.items.findIndex((task) => task._id === action.payload._id);
         if (index !== -1) {
           state.items[index] = action.payload;
         }

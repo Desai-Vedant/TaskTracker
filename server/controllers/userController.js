@@ -9,6 +9,18 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
 
+// Cookie configuration based on environment
+const getCookieConfig = () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProduction, // Only use secure in production
+    sameSite: isProduction ? 'none' : 'lax', // Required for cross-site cookies in production
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    path: '/'
+  };
+};
+
 // Register
 export const registerUser = async (req, res) => {
   try {
@@ -84,13 +96,8 @@ export const loginUser = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // Set HTTP-only cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax", // Explicitly set to lax for better security and compatibility
-      maxAge: 3600000 // 1 hour
-    });
+    // Set cookie with proper configuration
+    res.cookie("token", token, getCookieConfig());
 
     // Also send token in response for client-side storage
     return res.status(200).json({
@@ -115,11 +122,10 @@ export const loginUser = async (req, res) => {
 // Logout
 export const logoutUser = async (req, res) => {
   try {
-    // Clear the HTTP-only cookie
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax" // Explicitly set to lax for better security and compatibility
+    // Clear the cookie with the same configuration
+    res.cookie("token", '', {
+      ...getCookieConfig(),
+      maxAge: 0 // Expire immediately
     });
 
     return res.status(200).json({ 

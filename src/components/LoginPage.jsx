@@ -13,11 +13,10 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import axios from "axios";
 import Cookies from "js-cookie";
 import { useDispatch } from "react-redux";
 import { clearTasks } from "../store/tasksSlice";
-import { apiEndpoints } from "../config/api";
+import { apiClient } from "../config/api";
 
 const LoginPage = ({ setAuth }) => {
   const [formData, setFormData] = useState({
@@ -69,15 +68,9 @@ const LoginPage = ({ setAuth }) => {
     setError("");
 
     try {
-      const response = await axios.post(
-        apiEndpoints.login,
-        formData,
-        { 
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        }
+      const response = await apiClient.post(
+        "/user/login",
+        formData
       );
 
       if (response.data.status === 'success') {

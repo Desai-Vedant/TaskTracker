@@ -78,7 +78,7 @@ const LoginPage = ({ setAuth }) => {
         dispatch(clearTasks());
         // Store token in cookie
         Cookies.set('localToken', response.data.token, { 
-          expires: 1/24, // 1 hour
+          expires: 12/24, // 12 hours
           sameSite: 'None',
           secure: true  // Required when sameSite is 'None'
         });

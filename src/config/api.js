@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie';
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Create axios instance with default config
@@ -10,6 +12,23 @@ const apiClient = axios.create({
         'Content-Type': 'application/json'
     }
 });
+
+// Add response interceptor to handle unauthorized errors
+apiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            // Clear cookies and local storage
+            Cookies.remove('localToken');
+            Cookies.remove('token');
+            localStorage.clear();
+            
+            // Redirect to login page
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
 
 export const apiEndpoints = {
     login: `${API_URL}/user/login`,

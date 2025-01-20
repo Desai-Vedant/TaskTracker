@@ -16,7 +16,7 @@ const getCookieConfig = () => {
     httpOnly: true,
     secure: isProduction, // Only use secure in production
     sameSite: isProduction ? 'none' : 'lax', // Required for cross-site cookies in production
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    maxAge: 12 * 60 * 60 * 1000, // 12 hours
     path: '/'
   };
 };
@@ -93,7 +93,7 @@ export const loginUser = async (req, res) => {
         name: user.name
       },
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "12h" }
     );
 
     // Set cookie with proper configuration

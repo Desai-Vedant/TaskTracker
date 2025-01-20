@@ -10,7 +10,6 @@ import {
   Grid,
   Paper,
 } from "@mui/material";
-import axios from "axios";
 import { apiClient } from "../config/api";
 
 const SignupPage = () => {
@@ -40,7 +39,11 @@ const SignupPage = () => {
         setError("Registration failed");
       }
     } catch (err) {
-      setError("Registration failed");
+      if (err.response?.status === 409) {
+        setError("User already exists, Please Login.");
+      } else {
+        setError(`Registration failed`);
+      }
     }
   };
 

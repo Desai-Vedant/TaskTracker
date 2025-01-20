@@ -59,10 +59,7 @@ const tasksSlice = createSlice({
       state.items = [];
       state.status = "idle";
       state.error = null;
-      state.filter = {
-        status: null,
-        search: "",
-      };
+      state.filter = initialState.filter;
     },
     setStatusFilter: (state, action) => {
       state.filter.status = action.payload;

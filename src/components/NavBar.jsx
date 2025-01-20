@@ -47,6 +47,9 @@ const NavBar = ({ setAuth }) => {
       await apiClient.post('/user/logout');
       dispatch(clearTasks());
       setAuth(false);
+      Cookies.remove('localToken');
+      Cookies.remove('token')
+      localStorage.clear();
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);

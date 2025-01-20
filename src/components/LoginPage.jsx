@@ -79,8 +79,8 @@ const LoginPage = ({ setAuth }) => {
         // Store token in cookie
         Cookies.set('localToken', response.data.token, { 
           expires: 1/24, // 1 hour
-          secure: window.location.protocol === 'https:',
-          sameSite: 'Lax'
+          sameSite: 'None',
+          secure: true  // Required when sameSite is 'None'
         });
 
         // Store user data

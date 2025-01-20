@@ -49,7 +49,8 @@ export function TaskList() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    if (status === 'idle') {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (status === 'idle' && user?.id) {
       dispatch(fetchTasks());
     }
   }, [status, dispatch]);

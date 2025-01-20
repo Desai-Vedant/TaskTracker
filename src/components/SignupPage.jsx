@@ -11,6 +11,7 @@ import {
   Paper,
 } from "@mui/material";
 import axios from "axios";
+import { apiClient } from "../config/api";
 
 const SignupPage = () => {
   const [name, setName] = useState("");
@@ -27,12 +28,17 @@ const SignupPage = () => {
       return;
     }
     try {
-      await axios.post("http://localhost:5000/api/user/register", {
+      const formData = {
         name,
         email,
         password,
-      });
-      navigate("/login");
+      };
+      const response = await apiClient.post("/user/register", formData);
+      if (response.status === 201) {
+        navigate("/login");
+      } else {
+        setError("Registration failed");
+      }
     } catch (err) {
       setError("Registration failed");
     }

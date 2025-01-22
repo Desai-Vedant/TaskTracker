@@ -11,13 +11,13 @@ if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
 
 // Cookie configuration based on environment
 const getCookieConfig = () => {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
   return {
     httpOnly: true,
     secure: isProduction, // Only use secure in production
-    sameSite: isProduction ? 'none' : 'lax', // Required for cross-site cookies in production
+    sameSite: isProduction ? "none" : "lax", // Required for cross-site cookies in production
     maxAge: 12 * 60 * 60 * 1000, // 12 hours
-    path: '/'
+    path: "/",
   };
 };
 
@@ -55,34 +55,34 @@ export const loginUser = async (req, res) => {
 
     // Input validation
     if (!email || !password) {
-      return res.status(400).json({ 
-        status: 'error',
-        message: "Email and password are required!" 
+      return res.status(400).json({
+        status: "error",
+        message: "Email and password are required!",
       });
     }
 
     // Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ 
-        status: 'error',
-        message: "Invalid email format" 
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid email format",
       });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ 
-        status: 'error',
-        message: "Invalid credentials" 
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid credentials",
       });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(401).json({ 
-        status: 'error',
-        message: "Invalid credentials" 
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid credentials",
       });
     }
 
@@ -90,7 +90,7 @@ export const loginUser = async (req, res) => {
       {
         user_id: user._id,
         email: user.email,
-        name: user.name
+        name: user.name,
       },
       JWT_SECRET,
       { expiresIn: "12h" }
@@ -101,20 +101,20 @@ export const loginUser = async (req, res) => {
 
     // Also send token in response for client-side storage
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       message: "Login successful",
-      user: { 
-        id: user._id, 
-        email: user.email, 
-        name: user.name 
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
       },
-      token
+      token,
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ 
-      status: 'error',
-      message: "An error occurred during login" 
+    res.status(500).json({
+      status: "error",
+      message: "An error occurred during login",
     });
   }
 };
@@ -123,20 +123,20 @@ export const loginUser = async (req, res) => {
 export const logoutUser = async (req, res) => {
   try {
     // Clear the cookie with the same configuration
-    res.cookie("token", '', {
+    res.cookie("token", "", {
       ...getCookieConfig(),
-      maxAge: 0 // Expire immediately
+      maxAge: 0, // Expire immediately
     });
 
-    return res.status(200).json({ 
-      status: 'success',
-      message: "Logged out successfully" 
+    return res.status(200).json({
+      status: "success",
+      message: "Logged out successfully",
     });
   } catch (error) {
     console.error("Logout error:", error);
-    res.status(500).json({ 
-      status: 'error',
-      message: "An error occurred during logout" 
+    res.status(500).json({
+      status: "error",
+      message: "An error occurred during logout",
     });
   }
 };

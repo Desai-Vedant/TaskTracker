@@ -61,30 +61,27 @@ const LoginPage = ({ setAuth }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await apiClient.post(
-        "/user/login",
-        formData
-      );
+      const response = await apiClient.post("/user/login", formData);
 
-      if (response.data.status === 'success') {
+      if (response.data.status === "success") {
         // Clear any existing tasks before setting new user data
         dispatch(clearTasks());
         // Store token in cookie
-        Cookies.set('localToken', response.data.token, { 
-          expires: 12/24, // 12 hours
-          sameSite: 'None',
-          secure: true  // Required when sameSite is 'None'
+        Cookies.set("localToken", response.data.token, {
+          expires: 12 / 24, // 12 hours
+          sameSite: "None",
+          secure: true, // Required when sameSite is 'None'
         });
 
         // Store user data
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem("user", JSON.stringify(response.data.user));
 
         // Update auth state
         setAuth(true);
@@ -121,7 +118,7 @@ const LoginPage = ({ setAuth }) => {
             Access your tasks by logging in.
           </Typography>
         </Box>
-        
+
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
@@ -149,7 +146,7 @@ const LoginPage = ({ setAuth }) => {
             disabled={isLoading}
             error={!!error && error.includes("email")}
           />
-          
+
           <TextField
             label="Password"
             type={showPassword ? "text" : "password"}
@@ -187,7 +184,7 @@ const LoginPage = ({ setAuth }) => {
               mt: 2,
               textTransform: "none",
               borderRadius: "8px",
-              height: "48px"
+              height: "48px",
             }}
           >
             {isLoading ? (

@@ -2,6 +2,8 @@
 
 A MERN stack based web-application designed to manage tasks efficiently.
 
+Check App Live : https://task-tracker-app-pro.netlify.app/
+
 ### Key Features
 
 - Create tasks with description and due date

@@ -11,6 +11,8 @@ A MERN stack based web-application designed to manage tasks efficiently.
 - Responsive UI for desktop and mobile devices
 - Switch between dark and light theme
 
+![1737359618147](image/README/TaskTrackerPoster.png)
+
 ### Getting Started
 
 #### Client

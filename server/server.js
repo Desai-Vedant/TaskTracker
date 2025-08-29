@@ -8,9 +8,21 @@ import cookieParser from "cookie-parser";
 
 dotenv.config();
 
-connectDB();
-
 const app = express();
+
+// Initialize database connection before starting the server
+const initializeServer = async () => {
+  try {
+    await connectDB();
+    
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to initialize server:', error);
+    process.exit(1);
+  }
+};
 const PORT = process.env.PORT || 5000;
 
 // CORS configuration
@@ -56,7 +68,5 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start the Server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Initialize the server
+initializeServer();
